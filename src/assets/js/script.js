@@ -25,7 +25,9 @@ const productos = [
   { id: 19, nombre: "Agua de Limón", imagen: "img/LIMON.png", ingredientes: ["Con hielo" , "Sin hielo"], stock: 10, minStock: 3 }
 ];
 
-// ── Helpers LocalStorage ───────────────────────────────────────────────
+// ── Funciones de LocalStorage ───────────────────────────────────────────────
+function getHistorial() { return JSON.parse(localStorage.getItem('historialPedidos')) || []; }
+function setHistorial(historial) { localStorage.setItem('historialPedidos', JSON.stringify(historial)); }
 function getPedido() { return JSON.parse(localStorage.getItem("pedido")) || []; }
 function setPedido(p) { localStorage.setItem("pedido", JSON.stringify(p)); }
 function getKitchen() { return JSON.parse(localStorage.getItem("kitchenOrders")) || []; }
@@ -104,45 +106,98 @@ function actualizarContador() {
 }
 
 // ── MESERO ────────────────────────────────────────────────────────────
+// ── MESERO ────────────────────────────────────────────────────────────
 function renderPedidoMesero() {
   const cont = document.getElementById("pedidoMesero");
   if (!cont) return;
+
+  // Mostrar saludo personalizado con el nombre del mesero y la mesa
   const saludo = document.getElementById("saludoMesero");
   if (saludo) saludo.textContent = `Hola, ${localStorage.getItem("usuario")} — Mesa ${localStorage.getItem("mesa")}`;
-  const pedido = getPedido(); cont.innerHTML = "";
-  if (!pedido.length) {
+
+  // Obtener los pedidos de la mesa actual
+  const mesa = localStorage.getItem("mesa");
+  const kitchen = getKitchen(); 
+  const pedidosMesa = kitchen.filter(pedido => pedido.mesa === mesa); 
+
+  cont.innerHTML = "";  // Limpiar el contenido
+
+  // Verificar si hay pedidos para la mesa
+  if (!pedidosMesa.length) {
     cont.innerHTML = "<p>No hay productos.</p>";
     return;
   }
-  const tbl = document.createElement("table"); tbl.className = "table";
+
+  // Crear tabla para mostrar los pedidos
+  const tbl = document.createElement("table"); 
+  tbl.className = "table"; 
   tbl.innerHTML = `<thead><tr><th>Producto</th><th>Acción</th></tr></thead>`;
   const tb = document.createElement("tbody");
-  pedido.forEach((it, i) => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `<td>${it.nombre}</td><td>
-      <button class="btn btn-sm btn-danger" onclick="eliminarProducto(${i})">Eliminar</button>
-    </td>`;
-    tb.appendChild(tr);
+
+  // Recorrer los pedidos de la mesa y agregarlos a la tabla
+  pedidosMesa.forEach((pedido, i) => {
+    pedido.items.forEach((item) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td>${item.nombre}</td>
+      <td>
+        <button class="btn btn-sm btn-danger" onclick="eliminarProducto(${i}, '${mesa}')">Eliminar</button>
+      </td>`;
+      tb.appendChild(tr);
+    });
   });
-  tbl.appendChild(tb); cont.appendChild(tbl);
+  tbl.appendChild(tb);
+  cont.appendChild(tbl);
 }
 
-function eliminarProducto(i) {
-  const pd = getPedido(); pd.splice(i, 1); setPedido(pd); renderPedidoMesero(); actualizarContador();
-}
+// Eliminar producto de un pedido de la mesa actual
+function eliminarProducto(i, mesa) {
+  const kitchen = getKitchen();  // Obtener todos los pedidos
+  const pedidosMesa = kitchen.filter(pedido => pedido.mesa === mesa); 
 
-function vaciarPedido() {
-  if (confirm("Vaciar pedido?")) {
-    setPedido([]); renderPedidoMesero(); actualizarContador();
+  if (pedidosMesa[i]) {
+    // Eliminar el producto de la lista de pedidos
+    pedidosMesa[i].items.splice(i, 1);
+    // Actualizar la lista de pedidos de la mesa
+    kitchen[mesa] = pedidosMesa;
+    setKitchen(kitchen);
+
+    renderPedidoMesero();
+    actualizarContador();
   }
 }
 
+// Vaciar todos los pedidos de la mesa actual
+function vaciarPedido() {
+  if (confirm("Vaciar pedido?")) {
+    const mesa = localStorage.getItem("mesa");
+    const kitchen = getKitchen();
+    // Filtrar los pedidos de la mesa actual
+    const nuevosPedidos = kitchen.filter(pedido => pedido.mesa !== mesa);
+    setKitchen(nuevosPedidos);
+    renderPedidoMesero();
+    actualizarContador();
+  }
+}
+
+// Enviar los pedidos de la mesa actual a cocina
 function enviarACocina() {
   const pd = getPedido();
   if (!pd.length) return alert("No hay nada.");
+
+  const mesa = localStorage.getItem("mesa");
+  const usuario = localStorage.getItem("usuario");
+
+  // Almacenar los pedidos de la mesa en la cocina
   const k = getKitchen();
-  k.push({ mesa: localStorage.getItem("mesa"), usuario: localStorage.getItem("usuario"), items: pd, timestamp: Date.now() });
-  setKitchen(k); setPedido([]); renderPedidoMesero(); actualizarContador(); alert("Enviado a cocina");
+  k.push({ mesa, usuario, items: pd, timestamp: Date.now() });
+  setKitchen(k);
+
+  // Vaciar el pedido actual
+  setPedido([]);
+  renderPedidoMesero();
+  actualizarContador();
+
+  alert("Enviado a cocina");
 }
 
 // ── COCINA ────────────────────────────────────────────────────────────
