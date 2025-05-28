@@ -17,51 +17,59 @@
   <link rel="stylesheet" href="src/css/mesero.css" />
 </head>
 <body>
-  <div class="container">
-    <h3>Pedido Actual</h3>
-    <button class="btn-cerrar-sesion" onclick="cerrarSesion()">Cerrar sesión</button>
-    <div id="pedidoMesero">
-      <!-- Aquí se mostrará el pedido dinámicamente -->
+  <div class="container py-4">
+    <h3>Pedidos por Mesa</h3>
+
+    <!-- Selector de mesas -->
+    <div class="mb-3" style="max-width: 300px;">
+      <label for="selectMesa" class="form-label">Selecciona Mesa:</label>
+      <select id="selectMesa" class="form-select" aria-label="Selecciona Mesa">
+        <!-- Opciones se cargarán dinámicamente con JS -->
+      </select>
+    </div>
+
+    <!-- Contenedor donde se muestra el pedido filtrado -->
+    <div id="pedidoMesero" class="mb-4">
       <p>No hay productos.</p>
     </div>
 
-    <div class="botones">
-      <button class="vaciar" onclick="vaciarPedido()">Vaciar Pedido</button>
-      <button class="enviar" onclick="enviarACocina()">Enviar a Cocina</button>
+    <div class="d-flex gap-2 mb-4" style="max-width: 400px;">
+      <button class="btn btn-danger flex-grow-1" onclick="vaciarPedido()">Vaciar Pedido</button>
+      <button class="btn btn-success flex-grow-1" onclick="enviarACocina()">Enviar a Cocina</button>
     </div>
-  </div>
 
-  <!-- Modal de Edición -->
-  <div class="modal fade" id="modalEditar" tabindex="-1" aria-labelledby="modalEditarLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="modalEditarLabel">Editar Producto</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body" id="modalEditarContenido">
-          <!-- El contenido se carga dinámicamente aquí -->
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+    <!-- Modal de Edición -->
+    <div class="modal fade" id="modalEditar" tabindex="-1" aria-labelledby="modalEditarLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalEditarLabel">Editar Producto</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+          </div>
+          <div class="modal-body" id="modalEditarContenido">
+            <!-- El contenido se carga dinámicamente aquí -->
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Botón para borrar todos los datos -->
-  <div class="mt-3 d-grid container">
-    <button type="button" class="btn btn-danger" onclick="borrarLocalStorage()">Borrar Todos los Datos</button>
-  </div>
+    <!-- Botón para borrar todos los datos -->
+    <div class="mt-3 d-grid">
+      <button type="button" class="btn btn-danger" onclick="borrarLocalStorage()">Borrar Todos los Datos</button>
+    </div>
 
-  <!-- Botones para liberar mesas individualmente -->
-  <div class="mt-4 container">
-    <h6>Desbloquear mesas:</h6>
-    <div class="d-grid gap-2" style="max-width: 400px;">
-      <button class="btn btn-warning" onclick="liberarMesa('1')">Desbloquear Mesa 1</button>
-      <button class="btn btn-warning" onclick="liberarMesa('2')">Desbloquear Mesa 2</button>
-      <button class="btn btn-warning" onclick="liberarMesa('3')">Desbloquear Mesa 3</button>
-      <button class="btn btn-warning" onclick="liberarMesa('4')">Desbloquear Mesa 4</button>
+    <!-- Botones para liberar mesas individualmente -->
+    <div class="mt-4">
+      <h6>Desbloquear mesas:</h6>
+      <div class="d-grid gap-2" style="max-width: 400px;">
+        <button class="btn btn-warning" onclick="liberarMesa('1')">Desbloquear Mesa 1</button>
+        <button class="btn btn-warning" onclick="liberarMesa('2')">Desbloquear Mesa 2</button>
+        <button class="btn btn-warning" onclick="liberarMesa('3')">Desbloquear Mesa 3</button>
+        <button class="btn btn-warning" onclick="liberarMesa('4')">Desbloquear Mesa 4</button>
+      </div>
     </div>
   </div>
 
@@ -73,7 +81,7 @@
   <script src="src/assets/js/ind.js"></script>
 
   <script>
-    // Refrescar página automáticamente cada 10 segundos (10000 ms)
+    // Refrescar página automáticamente cada 20 segundos
     setInterval(() => {
       location.reload();
     }, 20000);
